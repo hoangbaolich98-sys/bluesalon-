@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueSalon - Lich Cua Toi</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+
+        .header {
+            background: #1A3C6E;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 24px; }
+        .btn-back {
+            background: white;
+            color: #1A3C6E;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .section h2 { color: #1A3C6E; margin-bottom: 15px; font-size: 18px; }
+
+        .input-group { display: flex; gap: 10px; }
+        input[type="email"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .btn-tim {
+            background: #1A3C6E;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .lich-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .lich-info { flex: 1; }
+        .lich-ten { font-weight: bold; color: #333; font-size: 16px; }
+        .lich-detail { color: #666; font-size: 14px; margin-top: 5px; }
+        .btn-huy {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-huy:hover { background: #c82333; }
+
+        .message {
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        .message.success { background: #d4edda; color: #155724; }
+        .message.error { background: #f8d7da; color: #721c24; }
+
+        .empty { text-align: center; color: #999; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>💇 BlueSalon</h1>
+    <button class="btn-back" onclick="window.location.href='index.html'">
+        ← Dat lich moi
+    </button>
+</div>
+
+<div class="container">
+
+    <!-- Tim lich theo Gmail -->
+    <div class="section">
+        <h2>📅 Lich cua toi</h2>
+        <div class="input-group">
+            <input type="email" id="gmail" placeholder="Nhap Gmail da dung khi dat lich...">
+            <button class="btn-tim" onclick="timLich()">Tim lich</button>
+        </div>
+        <div class="message" id="message"></div>
+    </div>
+
+    <!-- Danh sach lich hen -->
+    <div id="danhSachLich"></div>
+
+</div>
+
+<script>
+    const API = "http://localhost:8081";
+
+    async function timLich() {
+        const gmail = document.getElementById("gmail").value.trim();
+
+        if (!gmail) {
+            hienThongBao("Vui long nhap Gmail!", "error");
+            return;
+        }
+
+        // Chi goi dung 1 API de lay danh sach lich theo gmail
+        await hienDanhSachLich(gmail);
+    }
+
+    async function hienDanhSachLich(gmail) {
+        const container = document.getElementById("danhSachLich");
+        container.innerHTML = "";
+
+        const res = await fetch(`${API}/api/lich-cua-toi?gmail=${encodeURIComponent(gmail)}`);
+
+        if (!res.ok) {
+            hienThongBao("Loi ket noi server!", "error");
+            return;
+        }
+
+        const danhSach = await res.json();
+
+        if (danhSach.length === 0) {
+            container.innerHTML = '<div class="section"><p class="empty">Khong co lich hen nao!</p></div>';
+            return;
+        }
+
+        // An thong bao loi neu co
+        document.getElementById("message").style.display = "none";
+
+        danhSach.forEach(lich => {
+            // thoiGianHen tu backend la "YYYY-MM-DDTHH:mm:ss" (JST)
+            // Them +09:00 de browser hieu la JST, tranh lech gio
+            const ngayGio = new Date(lich.thoiGianHen + '+09:00');
+            const div = document.createElement("div");
+            div.className = "section";
+            div.innerHTML = `
+                <div class="lich-item">
+                    <div class="lich-info">
+                        <div class="lich-ten">${lich.dichVu.tenDichVu}</div>
+                        <div class="lich-detail">
+                            📅 ${ngayGio.toLocaleDateString('ja-JP')}
+                            🕐 ${ngayGio.toLocaleTimeString('ja-JP', {hour: '2-digit', minute: '2-digit'})}
+                        </div>
+                        <div class="lich-detail">💰 ${lich.dichVu.giaDichVu.toLocaleString()} yen</div>
+                    </div>
+                    <button class="btn-huy" onclick="huyLich('${gmail}', ${lich.lichHenId}, this)">
+                        Huy
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    async function huyLich(gmail, lichHenId, btn) {
+        btn.disabled = true;
+        btn.textContent = "Dang huy...";
+
+        // Dung URLSearchParams de encode dung chuan
+        const params = new URLSearchParams({
+            gmail: gmail,
+            lichHenId: lichHenId
+        });
+
+        const res = await fetch(`${API}/api/huy-lich`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params
+        });
+
+        const ketQua = await res.text();
+
+        if (ketQua.includes("thanh cong")) {
+            hienThongBao("Huy lich thanh cong!", "success");
+            hienDanhSachLich(gmail);
+        } else {
+            hienThongBao(ketQua, "error");
+            btn.disabled = false;
+            btn.textContent = "Huy";
+        }
+    }
+
+    function hienThongBao(msg, type) {
+        const el = document.getElementById("message");
+        el.textContent = msg;
+        el.className = `message ${type}`;
+        el.style.display = "block";
+    }
+</script>
+
+</body>
+</html>

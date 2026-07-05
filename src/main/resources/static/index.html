@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <title>BlueSalon - Dat Lich</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: #1A3C6E;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .btn-lich-toi {
+            background: white;
+            color: #1A3C6E;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #1A3C6E;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .dich-vu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dich-vu-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dich-vu-item:hover {
+            border-color: #1A3C6E;
+        }
+
+        .dich-vu-item.selected {
+            border-color: #1A3C6E;
+            background: #e8f0fe;
+        }
+
+        .dich-vu-ten {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .dich-vu-info {
+            color: #666;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        input[type="date"],
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        label {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .gio-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .gio-item {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .gio-item:hover {
+            border-color: #1A3C6E;
+        }
+
+        .gio-item.selected {
+            background: #dc3545;
+            color: white;
+            border-color: #1A3C6E;
+        }
+
+        .gio-item.booked {
+            background: #f0f0f0;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .btn-dat-lich {
+            width: 100%;
+            background: #1A3C6E;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-dat-lich:hover {
+            background: #2E75B6;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>💇 BlueSalon</h1>
+        <button class="btn-lich-toi" onclick="moLichCuaToi()">📅 Lich cua toi</button>
+    </div>
+
+    <div class="container">
+
+        <!-- Buoc 1: Chon dich vu -->
+        <div class="section">
+            <h2>1. Chon dich vu</h2>
+            <div class="dich-vu-list" id="dichVuList">
+                <p>Dang tai...</p>
+            </div>
+        </div>
+
+        <!-- Buoc 2: Chon ngay -->
+        <div class="section">
+            <h2>2. Chon ngay</h2>
+            <label>Ngay hen:</label>
+			<input type="text" id="ngayHen" placeholder="Chon ngay...">
+        </div>
+
+        <!-- Buoc 3: Chon gio -->
+        <div class="section">
+            <h2>3. Chon gio</h2>
+            <div class="gio-list" id="gioList">
+                <p>Vui long chon ngay truoc</p>
+            </div>
+        </div>
+
+        <!-- Buoc 4: Thong tin khach hang -->
+        <div class="section">
+            <h2>4. Thong tin cua ban</h2>
+            <label>Ho ten:</label>
+            <input type="text" id="hoTen" placeholder="Nguyen Van A">
+            <br><br>
+            <label>So dien thoai:</label>
+            <input type="tel" id="soDienThoai" placeholder="090-1234-5678">
+            <br><br>
+            <label>Gmail:</label>
+            <input type="email" id="gmail" placeholder="example@gmail.com">
+        </div>
+
+        <!-- Nut dat lich -->
+        <button class="btn-dat-lich" onclick="datLich()">DAT LICH</button>
+        <div class="message" id="message"></div>
+
+    </div>
+
+    <script>
+        const API = "http://localhost:8081";
+        let dichVuDaChon = null;
+        let gioDaChon = null;
+
+        // Helper: lay ngay local theo dinh dang YYYY-MM-DD (khong dung toISOString vi tra ve UTC)
+        function getLocalDateString(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        // Lay danh sach dich vu khi load trang
+        async function layDanhSachDichVu() {
+            const res = await fetch(`${API}/api/dich-vu`);
+            const data = await res.json();
+
+            const list = document.getElementById("dichVuList");
+            list.innerHTML = "";
+
+            data.forEach(dv => {
+                const div = document.createElement("div");
+                div.className = "dich-vu-item";
+                div.innerHTML = `
+                <div class="dich-vu-ten">${dv.tenDichVu}</div>
+                <div class="dich-vu-info">${dv.giaDichVu.toLocaleString()} yen | ${dv.thoiGian} phut</div>
+            `;
+                div.onclick = () => chonDichVu(div, dv);
+                list.appendChild(div);
+            });
+        }
+
+        function chonDichVu(element, dv) {
+            document.querySelectorAll(".dich-vu-item").forEach(el => el.classList.remove("selected"));
+            element.classList.add("selected");
+            dichVuDaChon = dv;
+        }
+
+        async function layGioTrong() {
+            // ngay tu input type="date" luon co dinh dang YYYY-MM-DD
+            const ngay = document.getElementById("ngayHen").value;
+            if (!ngay) return;
+
+
+            // Reset gio da chon khi doi ngay
+            gioDaChon = null;
+
+            const res = await fetch(`${API}/api/lich-theo-ngay?ngay=${ngay}T00:00:00`);
+            const lichDaDat = await res.json();
+
+            const gioList = document.getElementById("gioList");
+            gioList.innerHTML = "";
+
+            // Tao danh sach gio tu 9h-20h (tru 14h nghi trua)
+            const gioMo = [9, 10, 11, 12, 13, 15, 16, 17, 18, 19];
+
+            gioMo.forEach(gio => {
+                const thoiGian = `${String(gio).padStart(2, '0')}:00`;
+                // So sanh gio theo chuoi YYYY-MM-DDTHH de tranh van de timezone
+                const gioStr = `${ngay}T${String(gio).padStart(2, '0')}:00:00`;
+                const daCoNguoi = lichDaDat.some(l => l.thoiGianHen === gioStr);
+
+                const div = document.createElement("div");
+                div.className = `gio-item ${daCoNguoi ? 'booked' : ''}`;
+                div.textContent = thoiGian;
+
+                if (!daCoNguoi) {
+                    div.onclick = () => chonGio(div, ngay, gio);
+                }
+                gioList.appendChild(div);
+            });
+        }
+
+        function chonGio(element, ngay, gio) {
+            document.querySelectorAll(".gio-item").forEach(el => el.classList.remove("selected"));
+            element.classList.add("selected");
+            // Dinh dang: YYYY-MM-DDTHH:mm:ss - dung voi LocalDateTime.parse() ben backend
+            gioDaChon = `${ngay}T${String(gio).padStart(2, '0')}:00:00`;
+        }
+
+        async function datLich() {
+            const hoTen = document.getElementById("hoTen").value;
+            const soDienThoai = document.getElementById("soDienThoai").value;
+            const gmail = document.getElementById("gmail").value;
+
+            if (!dichVuDaChon) { hienThongBao("Vui long chon dich vu!", "error"); return; }
+            if (!gioDaChon) { hienThongBao("Vui long chon gio!", "error"); return; }
+            if (!hoTen) { hienThongBao("Vui long nhap ho ten!", "error"); return; }
+            if (!soDienThoai) { hienThongBao("Vui long nhap so dien thoai!", "error"); return; }
+            if (!gmail) { hienThongBao("Vui long nhap Gmail!", "error"); return; }
+
+            // Dung URLSearchParams de tu dong encode dung chuan application/x-www-form-urlencoded
+            const params = new URLSearchParams({
+                hoTen: hoTen,
+                soDienThoai: soDienThoai,
+                gmail: gmail,
+                dichVuId: dichVuDaChon.dichVuId,
+                thoiGianHen: gioDaChon
+            });
+
+            const res = await fetch(`${API}/api/dat-lich`, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: params
+            });
+            const ketQua = await res.text();
+            hienThongBao(ketQua, ketQua.includes("thanh cong") ? "success" : "error");
+        }
+
+        function hienThongBao(msg, type) {
+            const el = document.getElementById("message");
+            el.textContent = msg;
+            el.className = `message ${type}`;
+            el.style.display = "block";
+        }
+
+        function moLichCuaToi() {
+            window.location.href = "lich-cua-toi.html";
+        }
+
+        // Khoi dong
+        layDanhSachDichVu();
+
+        // Gioi han ngay chon: dung local date (khong dung toISOString vi tra ve UTC, co the sai 1 ngay khi o JST)
+        const todayStr = getLocalDateString(new Date());
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 30);
+		flatpickr("#ngayHen", {
+		    dateFormat: "Y-m-d",
+		    altInput: true,
+		    altFormat: "d/m/Y",
+		    minDate: todayStr,
+		    maxDate: getLocalDateString(maxDate),
+			disable: [
+
+			function(date){
+			return (date.getDay() === 1 || date.getDay() ===3);
+			}], 
+		    onChange: function() {
+		        layGioTrong();
+		    }
+		});
+    </script>
+
+</body>
+
+</html>
