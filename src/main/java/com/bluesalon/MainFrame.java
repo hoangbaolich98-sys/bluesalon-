@@ -30,7 +30,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class MainFrame extends JFrame {
-
+	private String token;
 	private JLabel lblThongKe;
 	private JTable table;
 	private JScrollPane scrollPane;
@@ -44,7 +44,8 @@ public class MainFrame extends JFrame {
 
 	private static final String API = "http://localhost:8081";
 
-	public MainFrame() {
+	public MainFrame(String token) {
+		this.token = token;
 		setTitle("BlueSalon - Quan ly lich");
 		setSize(900, 600);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -128,7 +129,7 @@ public class MainFrame extends JFrame {
 		java.util.Date date = (java.util.Date) spinnerNgay.getValue();
 		String ngay = new java.text.SimpleDateFormat("yyyy-MM-dd").format(date);
 		try {
-			URL url = new URL(API + "/api/admin/lich-theo-ngay?ngay=" + ngay + "T00:00:00");
+			URL url = new URL(API + "/api/admin/lich-theo-ngay?ngay=" + ngay + "T00:00:00" + "&token=" + token);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 
@@ -170,7 +171,7 @@ public class MainFrame extends JFrame {
 	public void taiDuLieuHomNay() {
 		String ngayHomNay = LocalDate.now().toString(); // YYYY-MM-DD
 		try {
-			URL url = new URL(API + "/api/admin/lich-theo-ngay?ngay=" + ngayHomNay + "T00:00:00");
+			URL url = new URL(API + "/api/admin/lich-theo-ngay?ngay=" + ngayHomNay + "T00:00:00" + "&token=" + token);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 
@@ -219,7 +220,8 @@ public class MainFrame extends JFrame {
 			return;
 		}
 		try {
-			URL url = new URL(API + "/api/admin/tim-theo-ten?hoTen=" + URLEncoder.encode(keyword, "UTF-8"));
+			URL url = new URL(
+					API + "/api/admin/tim-theo-ten?hoTen=" + URLEncoder.encode(keyword, "UTF-8") + "&token=" + token);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 
@@ -276,7 +278,8 @@ public class MainFrame extends JFrame {
 			conn.setDoOutput(true);
 			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-			String body = "lichHenId=" + lichHenId + "&trangThaiMoi=" + URLEncoder.encode(chon, "UTF-8");
+			String body = "lichHenId=" + lichHenId + "&trangThaiMoi=" + URLEncoder.encode(chon, "UTF-8") + "&token="
+					+ token;
 			conn.getOutputStream().write(body.getBytes("UTF-8"));
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
@@ -331,7 +334,8 @@ public class MainFrame extends JFrame {
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			String body = "lichHenId=" + lichHenId + "&thoiGianMoi=" + URLEncoder.encode(thoiGianMoi, "UTF-8");
+			String body = "lichHenId=" + lichHenId + "&thoiGianMoi=" + URLEncoder.encode(thoiGianMoi, "UTF-8")
+					+ "&token=" + token;
 			conn.getOutputStream().write(body.getBytes("UTF-8"));
 			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
 			String ketQua = br.readLine();
@@ -343,4 +347,7 @@ public class MainFrame extends JFrame {
 		}
 	}
 
+	public String getToken() {
+		return token;
+	}
 }

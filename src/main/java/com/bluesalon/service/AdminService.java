@@ -16,6 +16,9 @@ public class AdminService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	@Autowired
+	private TokenService tokenService;
+
 	// F06 - Dang nhap admin
 	public String dangNhap(String tenDangNhap, String matKhau) {
 
@@ -32,7 +35,7 @@ public class AdminService {
 			return "Loi: Mat khau khong chinh xac!";
 		}
 
-		// Buoc 4: Dang nhap thanh cong
-		return "Dang nhap thanh cong!";
+		// Buoc 4: Dang nhap thanh cong - phat token
+		return "OK:" + tokenService.taoToken();
 	}
 }

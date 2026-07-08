@@ -115,7 +115,8 @@ public class ThemLichFrame extends JFrame {
 
 			String body = "hoTen=" + URLEncoder.encode(hoTen, "UTF-8") + "&soDienThoai="
 					+ URLEncoder.encode(soDienThoai, "UTF-8") + "&gmail=" + URLEncoder.encode(gmail, "UTF-8")
-					+ "&dichVuId=" + dichVuId + "&thoiGianHen=" + URLEncoder.encode(thoiGianHen, "UTF-8");
+					+ "&dichVuId=" + dichVuId + "&thoiGianHen=" + URLEncoder.encode(thoiGianHen, "UTF-8") + "&token="
+					+ mainFrame.getToken();
 			conn.getOutputStream().write(body.getBytes("UTF-8"));
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));

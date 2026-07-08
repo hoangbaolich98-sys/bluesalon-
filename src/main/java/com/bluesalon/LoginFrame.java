@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -59,14 +60,16 @@ public class LoginFrame extends JFrame {
 				conn.setRequestMethod("POST");
 				conn.setDoOutput(true);
 
-				String params = "tenDangNhap=" + username + "&matKhau=" + password;
+				String params = "tenDangNhap=" + URLEncoder.encode(username, "UTF-8") + "&matKhau="
+						+ URLEncoder.encode(password, "UTF-8");
 				conn.getOutputStream().write(params.getBytes());
 
 				String ketQua = new String(conn.getInputStream().readAllBytes());
 
-				if (ketQua.contains("thanh cong")) {
+				if (ketQua.startsWith("OK:")) {
+					String token = ketQua.substring(3);
 					SwingUtilities.invokeLater(() -> {
-						new MainFrame();
+						new MainFrame(token);
 						dispose();
 					});
 				} else {

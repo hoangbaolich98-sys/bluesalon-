@@ -51,6 +51,6 @@ public class LichHenController {
 	@GetMapping("/lich-theo-ngay")
 	public List<LichHen> xemLichTheoNgay(@RequestParam String ngay) {
 		LocalDateTime thoiGian = LocalDateTime.parse(ngay);
-		return lichHenService.xemLichTheoNgay(thoiGian);
+		return lichHenService.xemGioTrongTheoNgay(thoiGian);
 	}
 }

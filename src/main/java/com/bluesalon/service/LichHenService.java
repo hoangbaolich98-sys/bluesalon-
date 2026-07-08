@@ -68,23 +68,32 @@ public class LichHenService {
 		if (dow == DayOfWeek.MONDAY || dow == DayOfWeek.WEDNESDAY) {
 			return "Không thể đặt lịch thứ 2 và thứ 4 ! ";
 		}
-// Kiem tra trung lich
-		if (lichHenRepository.existsByThoiGianHenAndTrangThaiLich(thoiGianHen, "Chua toi")) {
-			return "Loi: Gio nay da co nguoi dat, vui long chon gio khac!";
+		// Lay dich vu TRUOC de biet thoi luong
+		DichVu dichVu = dichVuRepository.findById(dichVuId).orElse(null);
+		if (dichVu == null) {
+			return "Loi: Dich vu khong ton tai!";
 		}
-
+		LocalDateTime ketThucMoi = thoiGianHen.plusMinutes(dichVu.getThoiGian());
+		// Lay danh sach lich "Chua toi" trong ngay do
+		LocalDateTime batDauNgay = thoiGianHen.toLocalDate().atStartOfDay();
+		LocalDateTime ketThucNgay = thoiGianHen.toLocalDate().atTime(23, 59, 59);
+		List<LichHen> lichTrongNgay = lichHenRepository.findByThoiGianHenBetweenAndTrangThaiLich(batDauNgay,
+				ketThucNgay, "Chua toi");
+		// Kiem tra chong lan thoi gian (thay cho existsByThoiGianHenAndTrangThaiLich
+		// cu)
+		for (LichHen lich : lichTrongNgay) {
+			LocalDateTime batDauCu = lich.getThoiGianHen();
+			LocalDateTime ketThucCu = lich.getThoiGianHen().plusMinutes(lich.getDichVu().getThoiGian());
+			if (batDauCu.isBefore(ketThucMoi) && thoiGianHen.isBefore(ketThucCu)) {
+				return "Loi: Gio nay trung voi lich khac, vui long chon gio khac!";
+			}
+		}
 // Luu khach hang
 		KhachHang khachHang = new KhachHang();
 		khachHang.setHoTen(hoTen);
 		khachHang.setSoDienThoai(soDienThoai);
 		khachHang.setGmail(gmail);
 		khachHangRepository.save(khachHang);
-
-// Lay dich vu
-		DichVu dichVu = dichVuRepository.findById(dichVuId).orElse(null);
-		if (dichVu == null) {
-			return "Loi: Dich vu khong ton tai!";
-		}
 
 // Luu lich hen
 		LichHen lichHen = new LichHen();
@@ -118,6 +127,7 @@ public class LichHenService {
 			return "Không thể đặt lịch thứ 2 và thứ 4 ! ";
 
 		}
+
 		ZonedDateTime homNayJST = ZonedDateTime.now(JST);
 		ZonedDateTime toiDaJST = homNayJST.plusDays(30);
 		ZonedDateTime thoiGianHenJST = thoiGianHen.atZone(JST);
@@ -129,8 +139,24 @@ public class LichHenService {
 			return "Loi: Chi duoc dat lich trong vong 30 ngay!";
 		}
 
-		if (lichHenRepository.existsByThoiGianHenAndTrangThaiLich(thoiGianHen, "Chua toi")) {
-			return "Loi: Gio nay da co nguoi dat, vui long chon gio khac!";
+		DichVu dichVu = dichVuRepository.findById(dichVuId).orElse(null);
+		if (dichVu == null) {
+			return "Loi: Dich vu khong ton tai!";
+		}
+		LocalDateTime ketThucMoi = thoiGianHen.plusMinutes(dichVu.getThoiGian());
+		// Lay danh sach lich "Chua toi" trong ngay do
+		LocalDateTime batDauNgay = thoiGianHen.toLocalDate().atStartOfDay();
+		LocalDateTime ketThucNgay = thoiGianHen.toLocalDate().atTime(23, 59, 59);
+		List<LichHen> lichTrongNgay = lichHenRepository.findByThoiGianHenBetweenAndTrangThaiLich(batDauNgay,
+				ketThucNgay, "Chua toi");
+		// Kiem tra chong lan thoi gian (thay cho existsByThoiGianHenAndTrangThaiLich
+		// cu)
+		for (LichHen lich : lichTrongNgay) {
+			LocalDateTime batDauCu = lich.getThoiGianHen();
+			LocalDateTime ketThucCu = lich.getThoiGianHen().plusMinutes(lich.getDichVu().getThoiGian());
+			if (batDauCu.isBefore(ketThucMoi) && thoiGianHen.isBefore(ketThucCu)) {
+				return "Loi: Gio nay trung voi lich khac, vui long chon gio khac!";
+			}
 		}
 
 		KhachHang khachHang = new KhachHang();
@@ -138,11 +164,6 @@ public class LichHenService {
 		khachHang.setSoDienThoai(soDienThoai);
 		khachHang.setGmail(gmail);
 		khachHangRepository.save(khachHang);
-
-		DichVu dichVu = dichVuRepository.findById(dichVuId).orElse(null);
-		if (dichVu == null) {
-			return "Loi: Dich vu khong ton tai!";
-		}
 
 		LichHen lichHen = new LichHen();
 		lichHen.setKhachHang(khachHang);
@@ -194,6 +215,13 @@ public class LichHenService {
 		return lichHenRepository.findByThoiGianHenBetween(batDau, ketThuc);
 	}
 
+	public List<LichHen> xemGioTrongTheoNgay(LocalDateTime ngay) {
+		LocalDateTime batDau = ngay.toLocalDate().atStartOfDay();
+		LocalDateTime ketThuc = ngay.toLocalDate().atTime(23, 59, 59);
+		// Chi lay lich "Chua toi" - dung cho trang khach hang kiem tra gio trong
+		return lichHenRepository.findByThoiGianHenBetweenAndTrangThaiLich(batDau, ketThuc, "Chua toi");
+	}
+
 	public String suaGio(int lichHenId, LocalDateTime thoiGianMoi) {
 		LichHen lichHen = lichHenRepository.findById(lichHenId).orElse(null);
 		if (lichHen == null) {
@@ -215,8 +243,21 @@ public class LichHenService {
 		if (thoiGianMoiJST.isAfter(toiDaJST)) {
 			return "Loi: Chi duoc sua lich trong vong 30 ngay!";
 		}
-		if (lichHenRepository.existsByThoiGianHenAndTrangThaiLich(thoiGianMoi, "Chua toi")) {
-			return "Loi: Gio nay da co nguoi dat, vui long chon gio khac!";
+		LocalDateTime ketThucMoi = thoiGianMoi.plusMinutes(lichHen.getDichVu().getThoiGian());
+		// Lay danh sach lich "Chua toi" trong ngay do
+		LocalDateTime batDauNgay = thoiGianMoi.toLocalDate().atStartOfDay();
+		LocalDateTime ketThucNgay = thoiGianMoi.toLocalDate().atTime(23, 59, 59);
+		List<LichHen> lichTrongNgay = lichHenRepository.findByThoiGianHenBetweenAndTrangThaiLich(batDauNgay,
+				ketThucNgay, "Chua toi");
+		for (LichHen lich : lichTrongNgay) {
+			if (lich.getLichHenId() == lichHenId) {
+				continue;
+			}
+			LocalDateTime batDauCu = lich.getThoiGianHen();
+			LocalDateTime ketThucCu = lich.getThoiGianHen().plusMinutes(lich.getDichVu().getThoiGian());
+			if (batDauCu.isBefore(ketThucMoi) && thoiGianMoi.isBefore(ketThucCu)) {
+				return "Loi: Gio nay trung voi lich khac, vui long chon gio khac!";
+			}
 		}
 		// Buoc 4: luu gio cu truoc khi cap nhat
 		LocalDateTime thoiGianCu = lichHen.getThoiGianHen();

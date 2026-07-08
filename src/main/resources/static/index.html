@@ -275,7 +275,10 @@
             const ngay = document.getElementById("ngayHen").value;
             if (!ngay) return;
 
-
+			if (!dichVuDaChon) {
+			    document.getElementById("gioList").innerHTML = "<p>Vui long chon dich vu truoc!</p>";
+			    return;
+			}
             // Reset gio da chon khi doi ngay
             gioDaChon = null;
 
@@ -291,8 +294,16 @@
             gioMo.forEach(gio => {
                 const thoiGian = `${String(gio).padStart(2, '0')}:00`;
                 // So sanh gio theo chuoi YYYY-MM-DDTHH de tranh van de timezone
-                const gioStr = `${ngay}T${String(gio).padStart(2, '0')}:00:00`;
-                const daCoNguoi = lichDaDat.some(l => l.thoiGianHen === gioStr);
+                const batDauMoi = gio * 60;
+				const ketThucMoi = batDauMoi + dichVuDaChon.thoiGian;
+				
+                const daCoNguoi = lichDaDat.some(l =>{
+					const gioCu = parseInt(l.thoiGianHen.substring(11,13));
+					const phutCu = parseInt(l.thoiGianHen.substring(14,16));
+					const batDauCu = gioCu * 60 + phutCu;
+					const ketThucCu =batDauCu + l.dichVu.thoiGian;
+					return batDauCu < ketThucMoi && batDauMoi < ketThucCu;
+				});
 
                 const div = document.createElement("div");
                 div.className = `gio-item ${daCoNguoi ? 'booked' : ''}`;
