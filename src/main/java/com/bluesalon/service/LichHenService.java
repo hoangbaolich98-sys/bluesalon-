@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.bluesalon.model.DichVu;
 import com.bluesalon.model.KhachHang;
@@ -37,6 +38,7 @@ public class LichHenService {
 		return dichVuRepository.findAll();
 	}
 
+	@Transactional
 	public String datLich(String hoTen, String soDienThoai, String gmail, int dichVuId, LocalDateTime thoiGianHen) {
 
 // Kiem tra du lieu trong
@@ -104,10 +106,11 @@ public class LichHenService {
 		lichHen.setNguonDatLich("ONLINE");
 		lichHenRepository.save(lichHen);
 
-		emailService.sendMailDatLich(gmail, hoTen, dichVu.getTenDichVu(), thoiGianHen);
+		emailService.sendMailDatLich(gmail, hoTen, dichVu.getTenDichVu(), dichVu.getThoiGian(), thoiGianHen);
 		return "Dat lich thanh cong!";
 	}
 
+	@Transactional
 	public String themLichThuCong(String hoTen, String soDienThoai, String gmail, int dichVuId,
 			LocalDateTime thoiGianHen) {
 
@@ -222,6 +225,7 @@ public class LichHenService {
 		return lichHenRepository.findByThoiGianHenBetweenAndTrangThaiLich(batDau, ketThuc, "Chua toi");
 	}
 
+	@Transactional
 	public String suaGio(int lichHenId, LocalDateTime thoiGianMoi) {
 		LichHen lichHen = lichHenRepository.findById(lichHenId).orElse(null);
 		if (lichHen == null) {

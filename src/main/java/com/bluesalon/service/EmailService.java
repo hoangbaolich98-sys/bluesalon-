@@ -14,14 +14,18 @@ public class EmailService {
 	@Autowired
 	private JavaMailSender mailSender;
 
-	public void sendMailDatLich(String gmail, String hoTen, String tenDichVu, LocalDateTime thoiGianHen) {
+	private static final String SDT_SALON = "070-9123-4567";
+
+	public void sendMailDatLich(String gmail, String hoTen, String tenDichVu, int thoiGianPhut,
+			LocalDateTime thoiGianHen) {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setTo(gmail);
 		message.setFrom("gmailbluesalon@gmail.com");
 		message.setSubject("Xac nhan dat lich thanh cong");
 		message.setText("Xin chao " + hoTen + "\n" + "Ban da dat lich thanh cong: " + tenDichVu + "\n"
 				+ "Thoi gian hen: " + thoiGianHen.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "\n"
-				+ "Cam on ban da su dung dich vu cua chung toi!");
+				+ "Thoi gian du kien: " + thoiGianPhut + " phut\n" + "Moi thac mac vui long lien he salon qua so: "
+				+ SDT_SALON + "\n" + "Cam on ban da su dung dich vu cua chung toi!");
 		mailSender.send(message);
 	}
 
@@ -32,9 +36,8 @@ public class EmailService {
 		message.setSubject("Ban da huy lich thanh cong");
 		message.setText("Xin chao " + hoTen + "\n" + "Ban da huy lich thanh cong: " + tenDichVu + "\n"
 				+ "Thoi gian hen: " + thoiGianHen.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "\n"
-				+ "Cam on ban da su dung dich vu cua chung toi!"
-
-		);
+				+ "Neu muon dat lai lich moi, vui long truy cap lai trang dat lich hoac lien he salon qua so: "
+				+ SDT_SALON + "\n" + "Cam on ban da su dung dich vu cua chung toi!");
 		mailSender.send(message);
 	}
 
@@ -47,6 +50,7 @@ public class EmailService {
 		message.setText("Xin chao " + hoTen + "\n" + "Ban da doi lich thanh cong: " + tenDichVu + "\n"
 				+ "Thoi gian hen cu: " + thoiGianHenCu.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "\n"
 				+ "Thoi gian hen moi: " + thoiGianHenMoi.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "\n"
+				+ "Moi thac mac vui long lien he salon qua so: " + SDT_SALON + "\n"
 				+ "Cam on ban da su dung dich vu cua chung toi!");
 		mailSender.send(message);
 	}

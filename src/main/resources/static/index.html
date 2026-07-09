@@ -342,15 +342,19 @@
                 dichVuId: dichVuDaChon.dichVuId,
                 thoiGianHen: gioDaChon
             });
-
-            const res = await fetch(`${API}/api/dat-lich`, {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: params
-            });
-            const ketQua = await res.text();
-            hienThongBao(ketQua, ketQua.includes("thanh cong") ? "success" : "error");
-        }
+			try{
+	            const res = await fetch(`${API}/api/dat-lich`, {
+	                method: "POST",
+ 	               headers: { "Content-Type": "application/x-www-form-urlencoded" },
+	                body: params
+ 	           });
+    	        const ketQua = await res.text();
+ 	           hienThongBao(ketQua, ketQua.includes("thanh cong") ? "success" : "error");
+        	} catch(err){
+				hienThongBao("Loi ket noi may chu! Vui long thu lai hoac goi 070-9123-4567", "error");
+			}
+			
+		}
 
         function hienThongBao(msg, type) {
             const el = document.getElementById("message");
